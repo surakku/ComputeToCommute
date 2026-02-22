@@ -80,10 +80,14 @@ return (
         <section className="bottom-container">
           <div className="left">
           <div className="bottom-con">
+            <h2>S</h2>
           </div>
-          <div className="bottom-con"></div>
-          <div className="bottom-con"></div>
-          <div className="bottom-con"></div> 
+          <div className="bottom-con">
+          </div>
+          <div className="bottom-con">
+          </div>
+          <div className="bottom-con">
+          </div> 
           </div>
           <div className="right">
           <div className="bottom-con">

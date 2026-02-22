@@ -71,6 +71,7 @@ body {
     );
 
   background-attachment: fixed;
+  font-family: 'Fragment Mono', monospace;
 }
 
 h1 {
@@ -128,7 +129,7 @@ backdrop-filter: blur(8px);
 }
 
 .bottom-con {
-  height: 12rem;
+  height: 14rem;
 
   background: linear-gradient(
     to bottom,
