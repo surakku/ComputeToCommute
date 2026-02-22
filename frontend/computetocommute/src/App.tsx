@@ -1,6 +1,7 @@
 import { MapContainer, TileLayer, Polyline, Popup } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 
+import HeatChart from './HeatChart'
 
 
 type PipeSegment = {
@@ -62,7 +63,7 @@ return (
               key={pipe.id}
               positions={pipe.coordinates}
               color={color}
-              weight={6}
+              weight={5}
             >
               <Popup>
                 <strong>Pipe ID:</strong> {pipe.id} <br />
@@ -77,16 +78,24 @@ return (
     </div>
     
         <section className="bottom-container">
+          <div className="left">
+          <div className="bottom-con">
+          </div>
           <div className="bottom-con"></div>
           <div className="bottom-con"></div>
-          <div className="bottom-con"></div>
-          <div className="bottom-con"></div>  
+          <div className="bottom-con"></div> 
+          </div>
+          <div className="right">
+          <div className="bottom-con">
+            <HeatChart></HeatChart>
+          </div>
+          </div> 
         </section>
-
+<footer></footer>
 
     
   </div>
 )
 }
 
-export default Ap
+export default App
