@@ -1,3 +1,18 @@
+body {
+  margin: 0;
+  min-height: 100vh;
+
+  background: linear-gradient(
+    135deg,
+    #0b2a4a 0%,
+    #123e66 45%,
+    #1e4f78 100%
+  );
+
+  background-attachment: fixed;
+}
+
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
