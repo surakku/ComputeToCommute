@@ -256,6 +256,14 @@ def create_app():
         window = request.args.get("window", default=12, type=int)
         result = flask_sample(loaded_model, df, window=window)
         return jsonify(result)
+    
+    @app.route("/api/scale", methods=["GET"])
+    def scale():
+        window = request.args.get("window", default=12, type=int)
+        result = flask_sample(loaded_model, df, window=window)
+        result["prediction_kwh"] = result["prediction_kwh"] * 45_000
+        result["rolling_actuals"] = [v * 45_000 for v in result["rolling_actuals"]]
+        return jsonify(result)
 
     @app.route("/api/health", methods=["GET"])
     def health():
