@@ -17,33 +17,50 @@ type HeatData = {
   pv?: number
 }
 
-export default function HeatChart() {
+interface HeatChartProps {
+  onPrediction?: (value: number) => void
+}
+
+export default function HeatChart({ onPrediction }: HeatChartProps) {
   const [data, setData] = useState<HeatData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true)
+      setError(null)
       try {
-        const res = await fetch("http://localhost:5000/api/predict")
+        const res = await fetch('http://localhost:5000/api/predict')
         if (!res.ok) throw new Error()
         const result = await res.json()
 
-        // Transform API response into chart data
-        const chartData: HeatData[] = result.x_past.map((x: number, i: number) => ({
-          name: `${x * 6}h`,
-          uv: result.rolling_actuals[i],
-        }))
+        const lastIndex = result.x_past.length - 1
+        const lastActual = result.rolling_actuals[lastIndex]
 
-        // Set pv on the last actual point so the dotted line connects
-        const lastActual = result.rolling_actuals[result.rolling_actuals.length - 1]
-        chartData[chartData.length - 1].pv = lastActual
-
-        // Add the prediction point (only pv, no uv)
-        chartData.push({
-          name: "+6h",
-          pv: result.future_values[1],
+        const chartData: HeatData[] = result.x_past.map((x: number, i: number) => {
+          const point: HeatData = {
+            name: `${x * 6}h`,
+            uv: result.rolling_actuals[i],
+          }
+          if (i === lastIndex) {
+            point.pv = lastActual
+          }
+          return point
         })
+
+        const predictionValue =
+          result.future_values?.[1] ??
+          result.prediction_kwh ??
+          null
+
+        if (predictionValue !== null && predictionValue !== undefined) {
+          chartData.push({
+            name: "+6h",
+            pv: predictionValue,
+          })
+          onPrediction?.(predictionValue)
+        }
 
         setData(chartData)
       } catch (err) {
@@ -60,53 +77,56 @@ export default function HeatChart() {
   if (error) return <p>{error}</p>
 
   return (
-    <ResponsiveContainer width="90%" height="90%">
-      <LineChart data={data}>
-        <CartesianGrid stroke="#ffffff20" strokeDasharray="4 4" />
+    <div style={{ width: '90%', height: '90%' }}>
+      <ResponsiveContainer width="90%" height="85%">
+        <LineChart data={data}>
+          <CartesianGrid stroke="#ffffff20" strokeDasharray="4 4" />
 
-        <XAxis dataKey="name" stroke="#ffffff80">
-          <Label value="Time" position="insideBottom" fill="#ffffff" dy={5}/>
-        </XAxis>
+          <XAxis dataKey="name" stroke="#ffffff80">
+            <Label value="Time" position="insideBottom" fill="#ffffff" dy={7}/>
+          </XAxis>
 
-        <YAxis stroke="#ffffff80">
-          <Label
-            value="Heat energy transferred"
-            angle={-90}
-            position="inside"
-            dx={-25}
-            fill="#ffffff"
+          <YAxis stroke="#ffffff80">
+            <Label
+              value="Heat energy transferred"
+              angle={-90}
+              position="inside"
+              dx={-25}
+              fill="#ffffff"
+            />
+          </YAxis>
+
+          <Tooltip
+            contentStyle={{ backgroundColor: '#123e66', border: 'none' }}
+            labelStyle={{ color: '#ffffff' }}
           />
-        </YAxis>
 
-        <Tooltip
-          contentStyle={{ backgroundColor: '#123e66', border: 'none' }}
-          labelStyle={{ color: '#ffffff' }}
-        />
+          <Legend />
 
-        <Legend />
+          <Line
+            name="Actual"
+            type="monotone"
+            dataKey="uv"
+            stroke="#4ade80"
+            strokeWidth={2}
+            dot={false}
+            isAnimationActive={false}
+          />
 
-        <Line
-          name="Actual"
-          type="monotone"
-          dataKey="uv"
-          stroke="#4ade80"
-          strokeWidth={2}
-          dot={false}
-          connectNulls={false}
-        />
+          <Line
+            name="Prediction"
+            type="monotone"
+            dataKey="pv"
+            stroke="#f87171"
+            strokeWidth={2}
+            strokeDasharray="8 4"
+            dot={{ r: 4, fill: '#f87171' }}
+            connectNulls
+            isAnimationActive={false}
+          />
 
-        <Line
-          name="Prediction"
-          type="monotone"
-          dataKey="pv"
-          stroke="#f87171"
-          strokeWidth={2}
-          strokeDasharray="8 4"
-          dot={{ r: 4, fill: '#f87171' }}
-          connectNulls={false}
-        />
-
-      </LineChart>
-    </ResponsiveContainer>
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
   )
 }
